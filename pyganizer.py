@@ -1,6 +1,7 @@
 import argparse
 import os 
 import time
+import shutil
 
 parser = argparse.ArgumentParser(description="File organizer with Python.")
 subparser = parser.add_subparsers(dest="command")
@@ -12,6 +13,9 @@ clean_parser_days.add_argument("--days", type=int, help="Delete files older than
 clean_parser_minutes = subparser.add_parser("clean_minutes")
 clean_parser_minutes.add_argument("folder", type=str, help="The folder destination.")
 clean_parser_minutes.add_argument("--minutes", type=int, help="Delete files older than this time in minutes.")
+
+clean_parser_folder = subparser.add_parser("clean_folder")
+clean_parser_folder.add_argument("folder", type=str,  help="The folder destination.")
 
 delete_parser_empty_folders = subparser.add_parser("delete_empty_folders")
 delete_parser_empty_folders.add_argument("folder", type=str, help="The folder destination.")
@@ -46,6 +50,22 @@ def clean_folder_minutes(folder, minutes):
             except OSError as e:
                 print(f"Error deleting file {item_path}: {e}")
 
+def clean_folder(folder):
+    for item in os.listdir(folder):
+        join_folder = os.path.join(folder, item)
+        if os.path.isfile(join_folder):
+            try:
+                os.remove(join_folder)
+                print(f"Successfully deleted item {join_folder}")
+            except OSError as e:
+                print(f"Error deleting {join_folder}: {e}")
+        if os.path.isdir(join_folder):
+            try:
+                shutil.rmtree(join_folder)
+                print(f"Successfully deleted folder {join_folder}")
+            except OSError as e:
+                print(f"Error deleting {join_folder}: {e}")
+
 def delete_empty_folders(folder):
     for filename in os.listdir(folder):
         join_folder = os.path.join(folder, filename)
@@ -62,6 +82,8 @@ if args.command == "clean_days":
     clean_folder_days(args.folder, args.days)
 elif args.command == "clean_minutes":
     clean_parser_minutes(args.folder, args.minutes)
+elif args.command == "clean_folder":
+    clean_folder(args.folder)
 elif args.command == "delete_empty_folders":
     delete_empty_folders(args.folder)
 else:
