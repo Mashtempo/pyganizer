@@ -13,6 +13,9 @@ clean_parser_minutes = subparser.add_parser("clean_minutes")
 clean_parser_minutes.add_argument("folder", type=str, help="The folder destination.")
 clean_parser_minutes.add_argument("--minutes", type=int, help="Delete files older than this time in minutes.")
 
+delete_parser_empty_folders = subparser.add_parser("delete_empty_folders")
+delete_parser_empty_folders.add_argument("folder", type=str, help="The folder destination.")
+
 args = parser.parse_args()
 
 def clean_folder_days(folder, days):
@@ -42,10 +45,24 @@ def clean_folder_minutes(folder, minutes):
                 print(f"{item_path} successfully deleted.")
             except OSError as e:
                 print(f"Error deleting file {item_path}: {e}")
+
+def delete_empty_folders(folder):
+    for filename in os.listdir(folder):
+        join_folder = os.path.join(folder, filename)
+        if os.path.isdir(join_folder):
+            if not os.listdir(join_folder):
+                try:
+                    os.rmdir(join_folder)
+                    print(f"Successfully deleted empty folder {join_folder}")
+                except OSError as e:
+                    print(f"Error deleting folder {join_folder}: {e}")
+            
                 
 if args.command == "clean_days":
     clean_folder_days(args.folder, args.days)
 elif args.command == "clean_minutes":
     clean_parser_minutes(args.folder, args.minutes)
+elif args.command == "delete_empty_folders":
+    delete_empty_folders(args.folder)
 else:
     parser.print_help()
